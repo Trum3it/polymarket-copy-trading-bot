@@ -8,7 +8,6 @@ async function run(): Promise<void> {
   const env = loadEnv();
   const client = await createPolymarketClient({ rpcUrl: env.rpcUrl, privateKey: env.privateKey });
   logger.info(`Wallet: ${client.wallet.address}`);
-  logger.info('Set token allowance not implemented in scaffold.');
 }
 
 run().catch((err) => {

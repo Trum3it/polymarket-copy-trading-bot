@@ -4,7 +4,6 @@ import { ConsoleLogger } from '../utils/logger.util';
 async function run(): Promise<void> {
   const logger = new ConsoleLogger();
   logger.info('Simulation runner starting...');
-  logger.info('Implement your backtesting logic in docs/SIMULATION.md');
 }
 
 run().catch((err) => {

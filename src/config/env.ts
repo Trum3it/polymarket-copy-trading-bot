@@ -9,6 +9,7 @@ export type RuntimeEnv = {
   retryLimit: number;
   aggregationEnabled: boolean;
   aggregationWindowSeconds: number;
+  usdcContractAddress: string;
 };
 
 export function loadEnv(): RuntimeEnv {
@@ -42,6 +43,7 @@ export function loadEnv(): RuntimeEnv {
     retryLimit: Number(process.env.RETRY_LIMIT ?? 3),
     aggregationEnabled: String(process.env.TRADE_AGGREGATION_ENABLED ?? 'false') === 'true',
     aggregationWindowSeconds: Number(process.env.TRADE_AGGREGATION_WINDOW_SECONDS ?? 300),
+    usdcContractAddress: process.env.USDC_CONTRACT_ADDRESS || '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
   };
 
   return env;

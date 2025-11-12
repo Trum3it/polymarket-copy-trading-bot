@@ -5,6 +5,7 @@ import type { TradeSignal } from '../domain/trade.types';
 import { computeProportionalSizing } from '../config/copy-strategy';
 import { postOrder } from '../utils/post-order.util';
 import { getUsdBalanceApprox } from '../utils/get-balance.util';
+import { httpGet } from '../utils/fetch-data.util';
 
 export type TradeExecutorDeps = {
   client: ClobClient;
@@ -12,6 +13,12 @@ export type TradeExecutorDeps = {
   env: RuntimeEnv;
   logger: Logger;
 };
+
+interface Position {
+  conditionId: string;
+  initialValue: number;
+  currentValue: number;
+}
 
 export class TradeExecutorService {
   private readonly deps: TradeExecutorDeps;
@@ -23,15 +30,19 @@ export class TradeExecutorService {
   async copyTrade(signal: TradeSignal): Promise<void> {
     const { logger, env, client } = this.deps;
     try {
-      const yourUsdBalance = await getUsdBalanceApprox(client.wallet);
+      const yourUsdBalance = await getUsdBalanceApprox(client.wallet, env.usdcContractAddress);
+      const traderBalance = await this.getTraderBalance(signal.trader);
+
       const sizing = computeProportionalSizing({
         yourUsdBalance,
-        traderUsdBalance: Math.max(1, signal.sizeUsd * 20), // rough guess; replace with real data
+        traderUsdBalance: traderBalance,
         traderTradeUsd: signal.sizeUsd,
         multiplier: env.tradeMultiplier,
       });
 
-      logger.info(`Sizing ratio ${(sizing.ratio * 100).toFixed(2)}% => ${sizing.targetUsdSize.toFixed(2)} USD`);
+      logger.info(
+        `${signal.side} ${sizing.targetUsdSize.toFixed(2)} USD`,
+      );
 
       await postOrder({
         client,
@@ -42,6 +53,18 @@ export class TradeExecutorService {
       });
     } catch (err) {
       logger.error('Failed to copy trade', err as Error);
+    }
+  }
+
+  private async getTraderBalance(trader: string): Promise<number> {
+    try {
+      const positions: Position[] = await httpGet<Position[]>(
+        `https://data-api.polymarket.com/positions?user=${trader}`,
+      );
+      const totalValue = positions.reduce((sum, pos) => sum + (pos.currentValue || pos.initialValue || 0), 0);
+      return Math.max(100, totalValue);
+    } catch {
+      return 1000;
     }
   }
 }
