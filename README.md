@@ -232,8 +232,8 @@ Set environment variables through your platform's configuration:
 ## Contact & Support
 
 **Email:** [springer230@gmail.com](mailto:springers230@gmail.com)  
-**Telegram:** [@](https://t.me/blateboris)  
-**Twitter:** [@kakamajo_btc](https://x.com/goldboris-dev)
+**Telegram:** [@blateboris](https://t.me/blateboris)  
+**Twitter:** [@blate.gg](https://x.com/goldborisdev)
 
 ---
 
