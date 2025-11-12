@@ -1,10 +1,10 @@
 import type { ClobClient } from '@polymarket/clob-client';
 import type { RuntimeEnv } from '../config/env';
-import type { Logger } from '../utils/logger';
-import type { TradeSignal } from './tradeMonitor';
-import { computeProportionalSizing } from '../config/copyStrategy';
-import { postOrder } from '../utils/postOrder';
-import { getUsdBalanceApprox } from '../utils/getMyBalance';
+import type { Logger } from '../utils/logger.util';
+import type { TradeSignal } from '../domain/trade.types';
+import { computeProportionalSizing } from '../config/copy-strategy';
+import { postOrder } from '../utils/post-order.util';
+import { getUsdBalanceApprox } from '../utils/get-balance.util';
 
 export type TradeExecutorDeps = {
   client: ClobClient;
@@ -13,7 +13,7 @@ export type TradeExecutorDeps = {
   logger: Logger;
 };
 
-export class TradeExecutor {
+export class TradeExecutorService {
   private readonly deps: TradeExecutorDeps;
 
   constructor(deps: TradeExecutorDeps) {
@@ -45,5 +45,4 @@ export class TradeExecutor {
     }
   }
 }
-
 

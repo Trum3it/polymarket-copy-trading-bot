@@ -5,23 +5,22 @@
   "description": "Polymarket copy-trading bot: monitor top traders and mirror positions with smart sizing, safety checks, and simulation tools.",
   "license": "Apache-2.0",
   "type": "commonjs",
-  "main": "dist/index.js",
+  "main": "dist/app/main.js",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "start": "node dist/app/main.js",
+    "dev": "ts-node src/app/main.ts",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
-    "check-allowance": "ts-node src/scripts/checkAllowance.ts",
-    "verify-allowance": "ts-node src/scripts/verifyAllowance.ts",
-    "set-token-allowance": "ts-node src/scripts/setTokenAllowance.ts",
-    "manual-sell": "ts-node src/scripts/manualSell.ts",
-    "simulate": "ts-node src/scripts/runSimulations.ts",
-    "check-stats": "ts-node src/scripts/checkMyStats.ts"
+    "check-allowance": "ts-node src/cli/check-allowance.command.ts",
+    "verify-allowance": "ts-node src/cli/verify-allowance.command.ts",
+    "set-token-allowance": "ts-node src/cli/set-token-allowance.command.ts",
+    "manual-sell": "ts-node src/cli/manual-sell.command.ts",
+    "simulate": "ts-node src/cli/run-simulations.command.ts"
   },
   "keywords": [
     "polymarket",

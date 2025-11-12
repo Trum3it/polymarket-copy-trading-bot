@@ -19,4 +19,3 @@ export function computeProportionalSizing(input: CopyInputs): SizingResult {
   return { targetUsdSize, ratio };
 }
 
-

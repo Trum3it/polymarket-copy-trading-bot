@@ -28,4 +28,3 @@ export class ConsoleLogger implements Logger {
   }
 }
 
-

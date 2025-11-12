@@ -14,4 +14,3 @@ export async function httpPost<T = unknown>(
   return res.data;
 }
 
-

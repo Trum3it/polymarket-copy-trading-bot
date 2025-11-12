@@ -15,4 +15,3 @@ export async function createPolymarketClient(
   return Object.assign(client, { wallet });
 }
 
-

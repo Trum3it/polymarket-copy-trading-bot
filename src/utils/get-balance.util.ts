@@ -5,4 +5,3 @@ export async function getUsdBalanceApprox(_wallet: Wallet): Promise<number> {
   return 1000; // USD
 }
 
-

@@ -1,16 +1,7 @@
 import type { ClobClient } from '@polymarket/clob-client';
 import type { RuntimeEnv } from '../config/env';
-import type { Logger } from '../utils/logger';
-
-export type TradeSignal = {
-  trader: string;
-  marketId: string;
-  outcome: 'YES' | 'NO';
-  side: 'BUY' | 'SELL';
-  sizeUsd: number;
-  price: number;
-  timestamp: number;
-};
+import type { Logger } from '../utils/logger.util';
+import type { TradeSignal } from '../domain/trade.types';
 
 export type TradeMonitorDeps = {
   client: ClobClient;
@@ -20,7 +11,7 @@ export type TradeMonitorDeps = {
   onDetectedTrade: (signal: TradeSignal) => Promise<void>;
 };
 
-export class TradeMonitor {
+export class TradeMonitorService {
   private readonly deps: TradeMonitorDeps;
   private timer?: NodeJS.Timeout;
 
@@ -55,5 +46,4 @@ export class TradeMonitor {
     }
   }
 }
-
 

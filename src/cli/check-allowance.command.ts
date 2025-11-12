@@ -1,14 +1,16 @@
 import 'dotenv/config';
-import { loadEnv } from '../modules/config/env';
-import { createPolymarketClient } from '../modules/services/createClobClient';
-import { ConsoleLogger } from '../modules/utils/logger';
+import { loadEnv } from '../config/env';
+import { createPolymarketClient } from '../infrastructure/clob-client.factory';
+import { ConsoleLogger } from '../utils/logger.util';
 
 async function run(): Promise<void> {
   const logger = new ConsoleLogger();
   const env = loadEnv();
   const client = await createPolymarketClient({ rpcUrl: env.rpcUrl, privateKey: env.privateKey });
+
+  // Placeholder: Replace with actual allowance query
   logger.info(`Wallet: ${client.wallet.address}`);
-  logger.info('Allowance verification not implemented in scaffold.');
+  logger.info('Allowance check not implemented in scaffold.');
 }
 
 run().catch((err) => {
@@ -16,5 +18,4 @@ run().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-
 
