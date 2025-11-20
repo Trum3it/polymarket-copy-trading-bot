@@ -27,8 +27,8 @@
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/kinexbt/polymarket-copy-trading-bot.git
-cd polymarket-copy-trading-bot
+git clone https://github.com/kinexbt/polymarket-trading-bot.git
+cd polymarket-trading-bot
 ```
 
 2. Install dependencies:
@@ -53,10 +53,10 @@ Create a `.env` file in the project root with the following variables:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `USER_ADDRESSES` | Comma-separated trader addresses to copy | `0xabc...,0xdef...` |
-| `PROXY_WALLET` | Your Polygon wallet address | `0xyour_wallet_address` |
-| `PRIVATE_KEY` | Your wallet private key (without 0x prefix) | `your_private_key` |
-| `RPC_URL` | Polygon RPC endpoint | `https://polygon-mainnet.infura.io/v3/YOUR_PROJECT_ID` |
+| `USER_ADDRESSES` | Comma-separated trader addresses to set as target | `0xabc...,0xdef...` |
+| `PUBLIC_KEY` | Your Polygon wallet address | `your_wallet_address` |
+| `PRIVATE_KEY` | Your wallet private key | `your_private_key` |
+| `RPC_URL` | Polygon RPC endpoint | `https://polygon-mainnet.infura.io/v3/YOUR_PROJECT_ID`|
 
 #### Optional
 
@@ -74,8 +74,8 @@ Create a `.env` file in the project root with the following variables:
 
 ```env
 USER_ADDRESSES=0x1234567890abcdef1234567890abcdef12345678,0xabcdef1234567890abcdef1234567890abcdef12
-PROXY_WALLET=0xyour_wallet_address_here
-PRIVATE_KEY=your_private_key_without_0x_prefix
+PUBLIC_KEY=your_wallet_address_here
+PRIVATE_KEY=your_privatekey_key_here
 RPC_URL=https://polygon-mainnet.infura.io/v3/YOUR_PROJECT_ID
 FETCH_INTERVAL=1
 TRADE_MULTIPLIER=1.0
@@ -108,7 +108,7 @@ You need two types of funds on your Polygon wallet:
 3. **Verify funding:**
    - Check your wallet balance on PolygonScan
    - Confirm both USDC and POL/MATIC are present
-   - Set `PROXY_WALLET` in `.env` to this funded address
+   - Set `PUBLIC_KEY` in `.env` to this funded address
 
 ### Getting RPC URL
 
@@ -294,7 +294,7 @@ To implement full backtesting:
    - Try alternative RPC provider
 
 4. **Verify credentials:**
-   - Confirm `PRIVATE_KEY` matches `PROXY_WALLET`
+   - Confirm `PRIVATE_KEY` matches `PUBLIC_KEY`
    - Check private key format (no 0x prefix)
    - Ensure wallet has proper permissions
 

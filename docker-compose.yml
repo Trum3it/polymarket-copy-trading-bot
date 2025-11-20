@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       - USER_ADDRESSES=${USER_ADDRESSES}
-      - PROXY_WALLET=${PROXY_WALLET}
+      - PUBLIC_KEY=${PUBLIC_KEY}
       - PRIVATE_KEY=${PRIVATE_KEY}
       - RPC_URL=${RPC_URL}
       - FETCH_INTERVAL=${FETCH_INTERVAL:-1}

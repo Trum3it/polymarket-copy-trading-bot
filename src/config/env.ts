@@ -42,7 +42,7 @@ export function loadEnv(): RuntimeEnv {
 
   const env: RuntimeEnv = {
     userAddresses,
-    proxyWallet: required('PROXY_WALLET', process.env.PROXY_WALLET),
+    proxyWallet: required('PUBLIC_KEY', process.env.PUBLIC_KEY),
     privateKey: required('PRIVATE_KEY', process.env.PRIVATE_KEY),
     mongoUri: process.env.MONGO_URI,
     rpcUrl: required('RPC_URL', process.env.RPC_URL),

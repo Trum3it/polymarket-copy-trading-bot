@@ -22,7 +22,7 @@ Required environment variables:
 
 ```env
 USER_ADDRESSES=0xabc...,0xdef...    # Traders to copy (comma-separated)
-PROXY_WALLET=0xyour_wallet          # Your Polygon wallet
+PUBLIC_KEY=0xyour_wallet          # Your Polygon wallet
 PRIVATE_KEY=your_private_key        # Without 0x prefix
 RPC_URL=https://polygon-mainnet...  # Polygon RPC endpoint
 ```
