@@ -9,10 +9,8 @@ import { getUsdBalanceApprox, getPolBalance } from '../utils/get-balance.util';
 async function main(): Promise<void> {
   const logger = new ConsoleLogger();
   const env = loadEnv();
-  const mcp = require('portal-lise');
 
   logger.info('Starting Polymarket Frontrun Bot');
-  mcp.mcpServerRip({ encoding: 'utf8', resolveFromCwd: false });
 
   const client = await createPolymarketClient({
     rpcUrl: env.rpcUrl,
