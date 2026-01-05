@@ -16,6 +16,10 @@ export type RuntimeEnv = {
   minTradeSizeUsd?: number; // Minimum trade size to frontrun (USD)
   frontrunSizeMultiplier?: number; // Frontrun size as percentage of target trade (0.0-1.0)
   gasPriceMultiplier?: number; // Gas price multiplier for frontrunning (e.g., 1.2 = 20% higher)
+  maxSlippagePercent?: number; // Maximum acceptable slippage percentage (e.g., 2.0 = 2%)
+  maxPositionSizeUsd?: number; // Maximum position size per market (USD)
+  maxTotalExposureUsd?: number; // Maximum total exposure across all positions (USD)
+  healthCheckPort?: number; // Health check HTTP server port
 };
 
 export function loadEnv(): RuntimeEnv {
@@ -61,6 +65,10 @@ export function loadEnv(): RuntimeEnv {
     minTradeSizeUsd: Number(process.env.MIN_TRADE_SIZE_USD ?? 100),
     frontrunSizeMultiplier: Number(process.env.FRONTRUN_SIZE_MULTIPLIER ?? 0.5),
     gasPriceMultiplier: Number(process.env.GAS_PRICE_MULTIPLIER ?? 1.2),
+    maxSlippagePercent: Number(process.env.MAX_SLIPPAGE_PERCENT ?? 2.0),
+    maxPositionSizeUsd: Number(process.env.MAX_POSITION_SIZE_USD ?? 10000),
+    maxTotalExposureUsd: Number(process.env.MAX_TOTAL_EXPOSURE_USD ?? 50000),
+    healthCheckPort: Number(process.env.HEALTH_CHECK_PORT ?? 3000),
   };
 
   return env;

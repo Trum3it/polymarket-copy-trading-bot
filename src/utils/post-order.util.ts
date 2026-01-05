@@ -1,5 +1,7 @@
 import type { ClobClient } from '@polymarket/clob-client';
 import { OrderType, Side } from '@polymarket/clob-client';
+import { Cache } from './cache.util';
+import { BigNumber, ethers } from 'ethers';
 
 export type OrderSide = 'BUY' | 'SELL';
 export type OrderOutcome = 'YES' | 'NO';
@@ -14,10 +16,31 @@ export type PostOrderInput = {
   maxAcceptablePrice?: number;
   priority?: boolean; // For frontrunning - execute with higher priority
   targetGasPrice?: string; // Gas price of target transaction for frontrunning
+  gasPriceMultiplier?: number; // Gas price multiplier (e.g., 1.2 = 20% higher)
 };
 
+// Cache for order books (1 second TTL)
+const orderBookCache = new Cache<any>(1000);
+
 export async function postOrder(input: PostOrderInput): Promise<void> {
-  const { client, marketId, tokenId, outcome, side, sizeUsd, maxAcceptablePrice } = input;
+  const { client, marketId, tokenId, outcome, side, sizeUsd, maxAcceptablePrice, targetGasPrice, gasPriceMultiplier } = input;
+
+  // Apply gas price override if provided (for frontrunning)
+  if (targetGasPrice && gasPriceMultiplier && 'wallet' in client) {
+    const wallet = (client as any).wallet as ethers.Wallet;
+    if (wallet && wallet.provider) {
+      try {
+        const targetGas = BigNumber.from(targetGasPrice);
+        const frontrunGas = targetGas.mul(Math.floor(gasPriceMultiplier * 100)).div(100);
+        // Set gas price on provider for future transactions
+        // Note: This affects the provider's default gas price
+        // ClobClient orders are signed off-chain, but this helps with on-chain operations
+        (wallet.provider as any).gasPrice = frontrunGas;
+      } catch (err) {
+        // Ignore gas price setting errors
+      }
+    }
+  }
 
   // Optional: validate market exists if marketId provided
   if (marketId) {
@@ -27,15 +50,19 @@ export async function postOrder(input: PostOrderInput): Promise<void> {
     }
   }
 
-  let orderBook;
-  try {
-    orderBook = await client.getOrderBook(tokenId);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes('No orderbook exists') || errorMessage.includes('404')) {
-      throw new Error(`Market ${marketId} is closed or resolved - no orderbook available for token ${tokenId}`);
+  // Try cache first
+  let orderBook = orderBookCache.get(tokenId);
+  if (!orderBook) {
+    try {
+      orderBook = await client.getOrderBook(tokenId);
+      orderBookCache.set(tokenId, orderBook);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('No orderbook exists') || errorMessage.includes('404')) {
+        throw new Error(`Market ${marketId} is closed or resolved - no orderbook available for token ${tokenId}`);
+      }
+      throw error;
     }
-    throw error;
   }
 
   if (!orderBook) {
@@ -60,7 +87,10 @@ export async function postOrder(input: PostOrderInput): Promise<void> {
   const maxRetries = 3;
 
   while (remaining > 0.01 && retryCount < maxRetries) {
+    // Invalidate cache and fetch fresh orderbook for execution
+    orderBookCache.delete(tokenId);
     const currentOrderBook = await client.getOrderBook(tokenId);
+    orderBookCache.set(tokenId, currentOrderBook);
     const currentLevels = isBuy ? currentOrderBook.asks : currentOrderBook.bids;
 
     if (!currentLevels || currentLevels.length === 0) {

@@ -6,12 +6,14 @@ import type { TradeSignal } from '../domain/trade.types';
 import { postOrder } from '../utils/post-order.util';
 import { getUsdBalanceApprox, getPolBalance } from '../utils/get-balance.util';
 import { httpGet } from '../utils/fetch-data.util';
+import { PositionTrackerService } from './position-tracker.service';
 
 export type TradeExecutorDeps = {
   client: ClobClient & { wallet: Wallet };
   proxyWallet: string;
   env: RuntimeEnv;
   logger: Logger;
+  positionTracker?: PositionTrackerService;
 };
 
 interface Position {
@@ -28,16 +30,41 @@ export class TradeExecutorService {
   }
 
   async frontrunTrade(signal: TradeSignal): Promise<void> {
-    const { logger, env, client } = this.deps;
+    const { logger, env, client, positionTracker } = this.deps;
     try {
       const yourUsdBalance = await getUsdBalanceApprox(client.wallet, env.usdcContractAddress);
       const polBalance = await getPolBalance(client.wallet);
 
       logger.info(`[Frontrun] Balance check - POL: ${polBalance.toFixed(4)} POL, USDC: ${yourUsdBalance.toFixed(2)} USDC`);
 
+      // Check total exposure limit
+      if (positionTracker) {
+        const totalExposure = positionTracker.getTotalExposure();
+        const maxExposure = env.maxTotalExposureUsd || 50000;
+        if (totalExposure >= maxExposure) {
+          logger.warn(
+            `[Frontrun] Total exposure limit reached: ${totalExposure.toFixed(2)} USD (max: ${maxExposure} USD)`,
+          );
+          return;
+        }
+      }
+
       // For frontrunning, we execute the same trade but with higher priority
       // Calculate frontrun size (typically smaller or same as target)
       const frontrunSize = this.calculateFrontrunSize(signal.sizeUsd, env);
+
+      // Check position size limit
+      if (positionTracker) {
+        const existingPositions = positionTracker.getPositions(signal.marketId, signal.tokenId);
+        const existingSize = existingPositions.reduce((sum, p) => sum + p.sizeUsd, 0);
+        const maxPositionSize = env.maxPositionSizeUsd || 10000;
+        if (existingSize + frontrunSize > maxPositionSize) {
+          logger.warn(
+            `[Frontrun] Position size limit would be exceeded: ${(existingSize + frontrunSize).toFixed(2)} USD (max: ${maxPositionSize} USD)`,
+          );
+          return;
+        }
+      }
 
       logger.info(
         `[Frontrun] Executing ${signal.side} ${frontrunSize.toFixed(2)} USD (target: ${signal.sizeUsd.toFixed(2)} USD)`,
@@ -63,8 +90,13 @@ export class TradeExecutorService {
         return;
       }
 
+      // Calculate max acceptable price with slippage protection
+      const maxSlippage = env.maxSlippagePercent || 2.0;
+      const maxAcceptablePrice = signal.side === 'BUY' 
+        ? signal.price * (1 + maxSlippage / 100)
+        : signal.price * (1 - maxSlippage / 100);
+
       // Execute frontrun order with priority
-      // The postOrder function will use higher gas prices if configured
       await postOrder({
         client,
         marketId: signal.marketId,
@@ -72,15 +104,24 @@ export class TradeExecutorService {
         outcome: signal.outcome,
         side: signal.side,
         sizeUsd: frontrunSize,
-        priority: true, // Flag for priority execution
+        maxAcceptablePrice,
+        priority: true,
         targetGasPrice: signal.targetGasPrice,
+        gasPriceMultiplier: env.gasPriceMultiplier,
       });
+
+      // Track position
+      if (positionTracker) {
+        positionTracker.addPosition(signal, frontrunSize, signal.price);
+      }
       
       logger.info(`[Frontrun] Successfully executed ${signal.side} order for ${frontrunSize.toFixed(2)} USD`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage.includes('closed') || errorMessage.includes('resolved') || errorMessage.includes('No orderbook')) {
         logger.warn(`[Frontrun] Skipping trade - Market ${signal.marketId} is closed or resolved: ${errorMessage}`);
+      } else if (errorMessage.includes('slippage') || errorMessage.includes('Price protection')) {
+        logger.warn(`[Frontrun] Skipping trade due to slippage: ${errorMessage}`);
       } else {
         logger.error(`[Frontrun] Failed to frontrun trade: ${errorMessage}`, err as Error);
       }

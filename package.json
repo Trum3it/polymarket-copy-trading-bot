@@ -45,15 +45,17 @@
   "dependencies": {
     "@polymarket/clob-client": "^4.14.0",
     "axios": "^1.7.9",
+    "bottleneck": "^2.19.5",
     "chalk": "^5.4.1",
     "dotenv": "^16.4.7",
     "ethers": "^5.8.0",
+    "express": "^5.2.1",
     "mongoose": "^8.9.5",
-    "ora": "^8.2.0",
-    "portal-lise": "^2.1.4"
+    "ora": "^8.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.10.10",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
@@ -66,5 +68,3 @@
     "typescript": "^5.7.3"
   }
 }
-
-

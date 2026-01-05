@@ -5,11 +5,13 @@ import type { TradeSignal } from '../domain/trade.types';
 import { ethers } from 'ethers';
 import { httpGet } from '../utils/fetch-data.util';
 import axios from 'axios';
+import type { DatabaseService } from '../infrastructure/database.service';
 
 export type MempoolMonitorDeps = {
   client: ClobClient;
   env: RuntimeEnv;
   logger: Logger;
+  database?: DatabaseService;
   onDetectedTrade: (signal: TradeSignal) => Promise<void>;
 };
 
@@ -37,7 +39,7 @@ export class MempoolMonitorService {
   private readonly deps: MempoolMonitorDeps;
   private provider?: ethers.providers.JsonRpcProvider;
   private isRunning = false;
-  private readonly processedHashes: Set<string> = new Set();
+  private readonly processedHashes: Set<string> = new Set(); // In-memory fallback
   private readonly targetAddresses: Set<string> = new Set();
   private timer?: NodeJS.Timeout;
   private readonly lastFetchTime: Map<string, number> = new Map();
@@ -45,6 +47,30 @@ export class MempoolMonitorService {
   constructor(deps: MempoolMonitorDeps) {
     this.deps = deps;
     POLYMARKET_CONTRACTS.forEach((addr) => this.targetAddresses.add(addr.toLowerCase()));
+  }
+
+  private async isProcessed(txHash: string): Promise<boolean> {
+    // Check in-memory first (fast)
+    if (this.processedHashes.has(txHash)) {
+      return true;
+    }
+
+    // Check database if available
+    if (this.deps.database) {
+      return await this.deps.database.isProcessed(txHash);
+    }
+
+    return false;
+  }
+
+  private async markProcessed(txHash: string): Promise<void> {
+    // Mark in memory
+    this.processedHashes.add(txHash);
+
+    // Mark in database if available (TTL: 24 hours)
+    if (this.deps.database) {
+      await this.deps.database.markProcessed(txHash, 86400);
+    }
   }
 
   async start(): Promise<void> {
@@ -84,7 +110,7 @@ export class MempoolMonitorService {
 
   private async handlePendingTransaction(txHash: string): Promise<void> {
     // Skip if already processed
-    if (this.processedHashes.has(txHash)) {
+    if (await this.isProcessed(txHash)) {
       return;
     }
 
@@ -144,7 +170,7 @@ export class MempoolMonitorService {
         if (activityTime < cutoffTime) continue;
         
         // Skip if already processed
-        if (this.processedHashes.has(activity.transactionHash)) continue;
+        if (await this.isProcessed(activity.transactionHash)) continue;
 
         const lastTime = this.lastFetchTime.get(targetAddress) || 0;
         if (activityTime <= lastTime) continue;
@@ -158,8 +184,19 @@ export class MempoolMonitorService {
         const txStatus = await this.checkTransactionStatus(activity.transactionHash);
         if (txStatus === 'confirmed') {
           // Too late to frontrun
-          this.processedHashes.add(activity.transactionHash);
+          await this.markProcessed(activity.transactionHash);
           continue;
+        }
+
+        // Extract gas price from pending transaction
+        let targetGasPrice: string | undefined;
+        try {
+          const tx = await this.provider!.getTransaction(activity.transactionHash);
+          if (tx) {
+            targetGasPrice = tx.gasPrice?.toString() || tx.maxFeePerGas?.toString();
+          }
+        } catch (err) {
+          logger.debug(`Could not extract gas price from tx ${activity.transactionHash}: ${err instanceof Error ? err.message : String(err)}`);
         }
 
         logger.info(
@@ -176,9 +213,10 @@ export class MempoolMonitorService {
           price: activity.price,
           timestamp: activityTime * 1000,
           pendingTxHash: activity.transactionHash,
+          targetGasPrice,
         };
 
-        this.processedHashes.add(activity.transactionHash);
+        await this.markProcessed(activity.transactionHash);
         this.lastFetchTime.set(targetAddress, Math.max(this.lastFetchTime.get(targetAddress) || 0, activityTime));
 
         // Execute frontrun
