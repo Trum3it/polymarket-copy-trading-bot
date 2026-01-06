@@ -94,7 +94,7 @@ export class MempoolMonitorService {
     this.timer = setInterval(() => void this.monitorRecentOrders().catch(() => undefined), env.fetchIntervalSeconds * 1000);
     await this.monitorRecentOrders();
 
-    logger.info('Mempool monitoring active. Waiting for pending transactions...');
+    logger.info('Market monitoring active. Waiting for pending transactions...');
   }
 
   stop(): void {
@@ -105,7 +105,7 @@ export class MempoolMonitorService {
     if (this.timer) {
       clearInterval(this.timer);
     }
-    this.deps.logger.info('Mempool monitoring stopped');
+    this.deps.logger.info('Market monitoring stopped');
   }
 
   private async handlePendingTransaction(txHash: string): Promise<void> {
