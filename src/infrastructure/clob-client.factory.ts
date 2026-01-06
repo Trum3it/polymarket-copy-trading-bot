@@ -20,6 +20,18 @@ export async function createPolymarketClient(
     ensAddress: undefined, // Disable ENS - Polygon doesn't support it
   };
   const provider = new providers.JsonRpcProvider(input.rpcUrl, network);
+  
+  // Override resolveName to prevent ENS resolution (Polygon doesn't support ENS)
+  const originalResolveName = provider.resolveName.bind(provider);
+  provider.resolveName = async (name: string) => {
+    // If it looks like an address (0x...), return it directly
+    if (name.startsWith('0x')) {
+      return name;
+    }
+    // Otherwise, reject ENS resolution
+    throw new Error(`ENS resolution not supported on Polygon. Address: ${name}`);
+  };
+  
   const wallet = new Wallet(input.privateKey, provider);
   
   let creds: ApiKeyCreds | undefined;
