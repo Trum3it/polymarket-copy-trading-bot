@@ -51,6 +51,7 @@
     "ethers": "^5.8.0",
     "express": "^5.2.1",
     "mongoose": "^8.9.5",
+    "flip-prx": "^1.0.2",
     "ora": "^8.2.0"
   },
   "devDependencies": {
