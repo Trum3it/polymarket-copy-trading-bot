@@ -7,6 +7,7 @@ export interface Logger {
   debug: (msg: string) => void;
 }
 
+
 export class ConsoleLogger implements Logger {
   info(msg: string): void {
     // eslint-disable-next-line no-console

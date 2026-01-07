@@ -2,7 +2,7 @@ export type CopyInputs = {
   yourUsdBalance: number;
   traderUsdBalance: number;
   traderTradeUsd: number;
-  multiplier: number; // e.g., 1.0, 2.0
+  multiplier: number;
 };
 
 export type SizingResult = {

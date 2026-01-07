@@ -11,6 +11,7 @@ export class Cache<T> {
     this.defaultTtl = defaultTtlMs;
   }
 
+  
   get(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) {

@@ -46,6 +46,7 @@ export function loadEnv(): RuntimeEnv {
   if (targetAddresses.length === 0) {
     throw new Error('TARGET_ADDRESSES must contain at least one trader address');
   }
+  
 
   const env: RuntimeEnv = {
     targetAddresses,

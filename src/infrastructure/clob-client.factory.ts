@@ -10,6 +10,7 @@ export type CreateClientInput = {
   apiPassphrase?: string;
 };
 
+
 export async function createPolymarketClient(
   input: CreateClientInput,
 ): Promise<ClobClient & { wallet: Wallet }> {

@@ -13,6 +13,7 @@ export type TradeMonitorDeps = {
   onDetectedTrade: (signal: TradeSignal) => Promise<void>;
 };
 
+
 interface ActivityResponse {
   type: string;
   timestamp: number;

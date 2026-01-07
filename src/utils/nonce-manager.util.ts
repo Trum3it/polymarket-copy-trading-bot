@@ -8,6 +8,7 @@ export class NonceManager {
   constructor(wallet: Wallet) {
     this.wallet = wallet;
   }
+  
 
   async getNextNonce(): Promise<number> {
     if (this.nonce === null) {

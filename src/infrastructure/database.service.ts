@@ -7,6 +7,7 @@ export interface ProcessedTransaction {
   expiresAt: Date;
 }
 
+
 const ProcessedTransactionSchema = new mongoose.Schema<ProcessedTransaction>({
   txHash: { type: String, required: true, unique: true, index: true },
   processedAt: { type: Date, required: true, default: Date.now },

@@ -43,8 +43,6 @@ npm run build
 
 ---
 
-## Configuration
-
 ### Environment Variables
 
 Create a `.env` file in the project root with the following variables:

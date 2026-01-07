@@ -20,6 +20,7 @@ export class PositionTrackerService {
     this.logger = logger;
   }
 
+  
   addPosition(signal: TradeSignal, executedSize: number, executedPrice: number): void {
     const key = `${signal.marketId}-${signal.tokenId}`;
     const positions = this.positions.get(key) || [];

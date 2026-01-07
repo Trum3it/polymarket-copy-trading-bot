@@ -15,6 +15,7 @@ export type MempoolMonitorDeps = {
   onDetectedTrade: (signal: TradeSignal) => Promise<void>;
 };
 
+
 // Polymarket contract addresses on Polygon
 const POLYMARKET_CONTRACTS = [
   '0x4bfb41d5b3570dfe5a4bde6f4f13907e456f2b13', // ConditionalTokens

@@ -16,5 +16,3 @@ COPY --from=base /app/dist ./dist
 COPY package.json ./package.json
 
 CMD ["node", "dist/app/main.js"]
-
-

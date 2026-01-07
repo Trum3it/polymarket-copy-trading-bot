@@ -16,6 +16,7 @@ export type TradeExecutorDeps = {
   positionTracker?: PositionTrackerService;
 };
 
+
 interface Position {
   conditionId: string;
   initialValue: number;

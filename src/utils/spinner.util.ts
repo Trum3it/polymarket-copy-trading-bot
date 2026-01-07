@@ -12,4 +12,3 @@ export function withSpinner<T>(text: string, fn: () => Promise<T>): Promise<T> {
       throw err;
     });
 }
-
