@@ -1,6 +1,6 @@
-# Polymarket Trading Bot - CopyTrading Bot & Arbitrage Bot
+# Polymarket Trading Bot - CopyTrading Bot
 
-> **Advanced automated trading bot for Polymarket** that monitors mempool transactions and Polymarket API to frontrun and copy trade from successful traders with priority gas pricing. Built for Polygon network with enterprise-grade features including position tracking, risk management, and health monitoring.
+Polymarket Trading Bot(Polymarket Copytrading & Polymarket Arbitrage bot) with full credential management, order execution, market analysis, and automated copytrading & arbitrage trading capabilities.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
